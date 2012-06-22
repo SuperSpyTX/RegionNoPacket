@@ -1,0 +1,10 @@
+name: RegionNoPacket
+main: me.freebuild.superspytx.RegionNoPacket
+version: ${project.version}
+description: Vanish from everybody as soon as you enter your own home.
+softdepend: [GriefPrevention]
+commands:
+   fbprevent:
+    description: Usable commands for RegionNoPacket.
+    usage: |
+      /<command> help - Help menu
