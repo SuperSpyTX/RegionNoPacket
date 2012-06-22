@@ -38,6 +38,8 @@ public class RegionNoPacket extends JavaPlugin implements Listener
         }
 
         //that's the only region plugin, so we're cool.
+        
+        getServer().getPluginManager().registerEvents(this, this);
 
         System.out.println("Enabled RegionNoPacket Successfully!");
     }
