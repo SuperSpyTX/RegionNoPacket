@@ -3,15 +3,17 @@ package me.freebuild.superspytx.extensions;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
+import me.freebuild.superspytx.Permissions;
+import me.freebuild.superspytx.RegionNoPacket;
 import me.ryanhamshire.GriefPrevention.Claim;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 
 public class GPExtension extends RegionExtension
 {
 
-    public GPExtension(GriefPrevention plug)
+    public GPExtension()
     {
-        super(plug);
+        super((GriefPrevention) RegionNoPacket.instance.getServer().getPluginManager().getPlugin("GriefPrevention"));
         // TODO Auto-generated constructor stub
     }
     
@@ -22,9 +24,9 @@ public class GPExtension extends RegionExtension
     }
     
     @Override
-    public String getPermFriendlyName()
+    public Permissions getPermission()
     {
-        return "griefprevention";
+        return Permissions.SEE_GRIEFPREVENTION;
     }
 
     @Override

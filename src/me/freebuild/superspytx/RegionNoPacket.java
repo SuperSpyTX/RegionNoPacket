@@ -1,13 +1,15 @@
 package me.freebuild.superspytx;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import me.freebuild.superspytx.extensions.FactionsExtension;
 import me.freebuild.superspytx.extensions.GPExtension;
 import me.freebuild.superspytx.extensions.RegionExtension;
-import me.ryanhamshire.GriefPrevention.GriefPrevention;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Effect;
@@ -22,7 +24,9 @@ public class RegionNoPacket extends JavaPlugin implements Listener
 {
 
     private List<RegionExtension> regionplugins = new ArrayList<RegionExtension>();
+    private Map<String, RegionExtension> vanishcache = new HashMap<String, RegionExtension>();
     private List<String> vanished = new CopyOnWriteArrayList<String>();
+    public static RegionNoPacket instance = null;
 
     public void onDisable()
     {
@@ -32,13 +36,20 @@ public class RegionNoPacket extends JavaPlugin implements Listener
     public void onEnable()
     {
         System.out.println("Enabling RegionNoPacket");
+        instance = this;
+
         if (getServer().getPluginManager().getPlugin("GriefPrevention") != null)
         {
-            regionplugins.add(new GPExtension((GriefPrevention) getServer().getPluginManager().getPlugin("GriefPrevention")));
+            regionplugins.add(new GPExtension());
+        }
+        
+        if (getServer().getPluginManager().getPlugin("Factions") != null)
+        {
+            regionplugins.add(new FactionsExtension());
         }
 
         //that's the only region plugin, so we're cool.
-        
+
         getServer().getPluginManager().registerEvents(this, this);
 
         System.out.println("Enabled RegionNoPacket Successfully!");
@@ -51,6 +62,17 @@ public class RegionNoPacket extends JavaPlugin implements Listener
 
         boolean justvanished = false;
         boolean justunvanished = false;
+        RegionExtension vanish = null;
+
+        if (vanishcache.containsKey(player.getName()))
+        {
+            vanish = vanishcache.get(player.getName());
+            if (!vanish.inRegion(player.getLocation()) || !vanish.isOwner(player))
+                justunvanished = true;
+
+            if (!justunvanished)
+                return;
+        }
 
         for (RegionExtension e : regionplugins)
         {
@@ -60,22 +82,28 @@ public class RegionNoPacket extends JavaPlugin implements Listener
             {
                 if (e.inRegion(player.getLocation()))
                 {
-                    if (e.isOwner(player) && player.hasPermission("rnp.vanish." + e.getPermFriendlyName()))
+                    if (e.isOwner(player) && e.getPermission().checkPermission(player))
                     {
                         vanished.add(player.getName());
                         for (Player pl : getServer().getOnlinePlayers())
                         {
-                            if (!pl.hasPermission("rnp.see"))
+                            if (!Permissions.SEE.checkPermission(player))
                             {
                                 pl.hidePlayer(player);
                             }
                         }
 
                         // Yes this is from VanishNoPacket :3
-                        for (int i = 0; i < 10; i++)
+
+                        if (Permissions.SMOKE.checkPermission(player))
                         {
-                            player.getLocation().getWorld().playEffect(player.getLocation(), Effect.SMOKE, (new Random()).nextInt(9));
+                            for (int i = 0; i < 10; i++)
+                            {
+                                player.getLocation().getWorld().playEffect(player.getLocation(), Effect.SMOKE, (new Random()).nextInt(9));
+                            }
                         }
+
+                        vanish = e;
 
                         justvanished = true;
                     }
@@ -88,16 +116,20 @@ public class RegionNoPacket extends JavaPlugin implements Listener
                     vanished.remove(player.getName());
                     for (Player pl : getServer().getOnlinePlayers())
                     {
-                        if (!pl.hasPermission("rnp.see." + e.getPermFriendlyName()))
+                        if (!e.getPermission().checkPermission(player))
                         {
                             pl.showPlayer(player);
                         }
                     }
 
                     // Yes this is from VanishNoPacket :3
-                    for (int i = 0; i < 10; i++)
+
+                    if (Permissions.SMOKE.checkPermission(player))
                     {
-                        player.getLocation().getWorld().playEffect(player.getLocation(), Effect.SMOKE, (new Random()).nextInt(9));
+                        for (int i = 0; i < 10; i++)
+                        {
+                            player.getLocation().getWorld().playEffect(player.getLocation(), Effect.SMOKE, (new Random()).nextInt(9));
+                        }
                     }
 
                     justunvanished = true;
@@ -106,10 +138,19 @@ public class RegionNoPacket extends JavaPlugin implements Listener
         }
 
         if (justvanished)
+        {
             player.sendMessage(ChatColor.GREEN + "You've vanished from everybody around you because you've entered your own home.");
+            if (!vanishcache.containsKey(player.getName()))
+            {
+                vanishcache.put(player.getName(), vanish);
+            }
+        }
 
         if (justunvanished)
+        {
             player.sendMessage(ChatColor.GREEN + "You've unvanished from everybody around you because you've left your own home.");
+            vanishcache.remove(player.getName());
+        }
     }
 
     @EventHandler
@@ -122,7 +163,7 @@ public class RegionNoPacket extends JavaPlugin implements Listener
         if (vanished.size() < 1)
             return;
 
-        if (player.hasPermission("rnp.see"))
+        if (Permissions.SEE.checkPermission(player))
             return;
 
         for (String playerstring : vanished)

@@ -1,8 +1,8 @@
-name: RegionNoPacket
-main: me.freebuild.superspytx.RegionNoPacket
+name: ${project.artifactId}
+main: ${project.groupId}.${project.artifactId}
 version: ${project.version}
-description: Vanish from everybody as soon as you enter your own home.
-softdepend: [GriefPrevention]
+description: ${project.description}
+softdepend: [GriefPrevention, Factions]
 commands:
    fbprevent:
     description: Usable commands for RegionNoPacket.

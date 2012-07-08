@@ -1,5 +1,7 @@
 package me.freebuild.superspytx.extensions;
 
+import me.freebuild.superspytx.Permissions;
+
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -17,9 +19,9 @@ public class RegionExtension
         return "Dummy Extension";
     }
     
-    public String getPermFriendlyName()
+    public Permissions getPermission()
     {
-        return "dummyextension";
+        return null;
     }
     
     public boolean inRegion(Location loc)

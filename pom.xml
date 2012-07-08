@@ -76,6 +76,13 @@
         <scope>system</scope>
         <systemPath>${basedir}/lib/GriefPrevention.jar</systemPath>
     </dependency>
+    <dependency>
+        <groupId>com.massivecraft.factions</groupId>
+        <artifactId>Factions</artifactId>
+        <version>1.0</version>
+        <scope>system</scope>
+        <systemPath>${basedir}/lib/Factions.jar</systemPath>
+    </dependency>
    </dependencies>
   
   <repositories>
